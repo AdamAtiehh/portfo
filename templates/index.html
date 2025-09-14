@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="google" content="notranslate" />
+  <meta name="author" content="Adam Atieh Portfolio" />
+  <title>Adam Atieh | Portfolio</title>
+
+  <link href="./static/main.3f6952e4.css" rel="stylesheet">
+    <link href="./static/assets/favicon.ico" rel="icon">
+
+
+  <style>
+    /* base */
+    :root { --bg: #0d0d0d; --fg: #fff; }
+    html,body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+       height: 100vh;   /* only the viewport height */
+  overflow: hidden; /* disables scrolling */
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+              url('./static/assets/images/space.jpg') center/cover no-repeat;
+    }
+
+    header { position: relative; z-index: 40; }
+
+    /* HERO */
+    .hero-full-container {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+ }
+
+    .hero-full-container .text-content { position: relative; z-index: 60; padding: 0 20px; }
+    .hero-full-container h1 {
+      margin: 0;
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--fg);
+    }
+    .hero-full-container h1 strong { font-weight: 800; }
+
+    /* overlay container */
+    .overlay-shapes {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* single overlay shape */
+    .overlay-shape {
+      position: absolute;
+      bottom: -40px; /* start slightly below hero */
+      display: block;
+      background: rgba(255,255,255,0.18);
+      border-radius: 2px;
+      will-change: transform, opacity;
+      animation-name: riseAndFade;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      transform-origin: center;
+      box-shadow: 0 0 6px rgba(255,255,255,0.02);
+      mix-blend-mode: screen;
+    }
+
+    .overlay-shape.small { background: rgba(255,255,255,0.12); }
+    .overlay-shape.med   { background: rgba(255,255,255,0.18); }
+    .overlay-shape.large { background: rgba(255,255,255,0.26); }
+
+    @keyframes riseAndFade {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 0.9;
+      }
+      60% {
+        opacity: 0.45;
+      }
+      90% {
+        opacity: 0.08;
+      }
+      100% {
+        transform: translateY(-220vh) rotate(720deg) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    /* responsive tweak: show overlays on mobile but reduce default sizes / durations for performance */
+    @media (max-width: 600px) {
+      .hero-full-container h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+      <div class="container">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="nav navbar-nav ">
+            <li><a href="./index.html" title="">01 : Home</a></li>
+            <li><a href="./works.html" title="">02 : Works</a></li>
+            <li><a href="./about.html" title="">03 : About me</a></li>
+            <li><a href="./contact.html" title="">04 : Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+
+  <!-- HERO -->
+  <div class="hero-full-container">
+    <!-- Overlay shapes container (JS populates many shapes here) -->
+    <div class="overlay-shapes" id="overlayShapes" aria-hidden="true"></div>
+
+    <!-- main hero text -->
+    <div class="text-content">
+      <h1>
+        <span id="typed-strings">
+          <span>I'm <strong>Adam Atieh</strong></span>
+          <span>Software Developer</span>
+          <span>Cybersecurity Enthusiast</span>
+        </span>
+        <span id="typed"></span>
+      </h1>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // safe-try typed
+      try { if (typeof type === 'function') type(); } catch(e){ /* noop */ }
+
+      // === overlay generator (responsive) ===
+      const CONTAINER = document.getElementById('overlayShapes');
+      const isMobile = window.innerWidth <= 600;
+
+      // tuned counts & sizes per device
+      const COUNT = isMobile ? 40 : 120; // initial batch
+      const SPAWN_INTERVAL = isMobile ? 700 : 450; // ms between continuous spawns
+
+      const MIN_SIZE = isMobile ? 4 : 6;   // px
+      const MAX_SIZE = isMobile ? 28 : 42;  // px
+
+      const MIN_DURATION = isMobile ? 5 : 6;  // seconds
+      const MAX_DURATION = isMobile ? 12 : 18; // seconds
+
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+      function pickClassBySize(s) {
+        if (s <= (isMobile ? 10 : 12)) return 'small';
+        if (s <= (isMobile ? 18 : 26)) return 'med';
+        return 'large';
+      }
+
+      // create initial batch
+      for (let i = 0; i < COUNT; i++) {
+        const el = document.createElement('span');
+        el.className = 'overlay-shape';
+
+        const size = Math.round(rand(MIN_SIZE, MAX_SIZE));
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+
+        // position across width
+        const left = rand(-6, 106);
+        el.style.left = left + '%';
+
+        // initial horizontal offset
+        const drift = rand(-24, 24); // px
+        el.style.transform = `translateX(${drift}px) rotate(${Math.round(rand(0,360))}deg)`;
+
+        const dur = +(rand(MIN_DURATION, MAX_DURATION)).toFixed(2);
+        const delay = -rand(0, dur);
+        el.style.animationDuration = dur + 's';
+        el.style.animationDelay = delay + 's';
+
+        el.classList.add(pickClassBySize(size));
+
+        const baseOpacity = Math.min(0.95, Math.max(0.07, (size / MAX_SIZE) * 0.6 + Math.random()*0.15));
+        el.style.opacity = baseOpacity;
+
+        CONTAINER.appendChild(el);
+      }
+
+      // continuous spawn for ongoing density (lower rate on mobile)
+      const spawnTimer = setInterval(() => {
+        const el = document.createElement('span');
+        el.className = 'overlay-shape';
+
+        const size = Math.round(rand(MIN_SIZE, MAX_SIZE));
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        el.style.left = rand(-6, 106) + '%';
+
+        const dur = +(rand(MIN_DURATION, MAX_DURATION)).toFixed(2);
+        el.style.animationDuration = dur + 's';
+        el.style.animationDelay = '0s';
+        el.style.transform = `translateX(${rand(-40,40)}px) rotate(${Math.round(rand(0,360))}deg)`;
+        el.classList.add(pickClassBySize(size));
+        el.style.opacity = Math.min(0.9, (size / MAX_SIZE) * 0.7 + Math.random()*0.12);
+
+        CONTAINER.appendChild(el);
+
+        // remove after animation end
+        setTimeout(() => el.remove(), (dur * 1000) + 2000);
+      }, SPAWN_INTERVAL);
+
+      // cleanup on page unload
+      window.addEventListener('beforeunload', () => clearInterval(spawnTimer));
+
+      // optional: if user resizes across mobile/desktop thresholds, you could reload or adapt; keeping simple
+    });
+  </script>
+
+  <script type="text/javascript" src="./static/main.70a66962.js"></script>
+</body>
+</html>
